@@ -65,7 +65,7 @@ function parseResult(result) {
 	var src = "<img src='http://sits-pod43.demandware.net/dw/image/v2/AANC_STG/on/demandware.static/-/Sites-MHJ_Master/default/dw06e2ea14/hi-res/%s?sw=224&sh=224&sm=fit' />";
 	var auctions = result.Auctions.Auction;
 	var html = [];
-	html.push("<ul>");
+	html.push("<html><body><ul>");
 
 	for(var i = 0; i < auctions.length; i++) {
 		var auction = auctions[i];
@@ -74,7 +74,7 @@ function parseResult(result) {
 		html.push("</li>");
 	}
 	
-	html.push("</ul>");
+	html.push("</ul></body></html>");
 	return html.join("");
 }
 
