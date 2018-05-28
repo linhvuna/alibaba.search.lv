@@ -1,0 +1,11 @@
+{
+  "name": "AlibabaSearchImage",
+  "version": "0.1.0",
+  "description": "Alibaba Search Image",
+  "main": "server.js",
+  "dependencies": {
+    "formidable": "latest",
+    "fs-extra": "latest",
+    "@alicloud/imagesearch-2018-01-20": "latest"
+  }
+}
