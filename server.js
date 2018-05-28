@@ -31,9 +31,10 @@ const server = http.createServer((req, res) => {
 
 });
 
-server.listen(port, hostname, () => {
-  console.log(`Server running at http://${hostname}:${port}/`);
+server.listen(process.env.PORT || 3000, function() {
+  console.log('Listening on http://localhost:' + (process.env.PORT || 3000));
 });
+
 
 function searchImage(file, res) {
 
