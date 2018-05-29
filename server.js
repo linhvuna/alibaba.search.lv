@@ -31,6 +31,8 @@ const server = http.createServer((req, res) => {
 
 });
 
+server.timeout = 40000;
+
 server.listen(process.env.PORT || 3000, function() {
   console.log('Listening on http://localhost:' + (process.env.PORT || 3000));
 });
