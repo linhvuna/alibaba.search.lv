@@ -54,7 +54,7 @@ function searchImage(file, res) {
 	var requestBody = buildRequestBody(fileContent);
 	client.searchItem({
   		instanceName: "demo",
-	}, requestBody).then(function (value) {
+	}, requestBody, {}, {timeout:60000}).then(function (value) {
   		var html = parseResult(value);
   		res.end(html);
 	}).catch(function (err) {
