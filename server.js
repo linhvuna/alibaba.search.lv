@@ -63,8 +63,12 @@ function searchImage(file, res) {
 function parseResult(result) {
 	var util = require( "util" );
 	var src = "<img src='http://sits-pod43.demandware.net/dw/image/v2/AANC_STG/on/demandware.static/-/Sites-MHJ_Master/default/dw06e2ea14/hi-res/%s?sw=224&sh=224&sm=fit' />";
-	var auctions = result.Auctions.Auction;
+	
 	var html = [];
+  if (!result.Auctions || !result.Auctions.Auction)
+    return "<p>No image found.</p>";
+  
+  var auctions = result.Auctions.Auction;
 	html.push("<html><body><ul>");
 
 	for(var i = 0; i < auctions.length; i++) {
