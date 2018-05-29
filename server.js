@@ -9,6 +9,7 @@ var secretKey = "F9Uddh0NNtbukhS6bPn7VnvXanbUAD";
 var aliUri = "http://imagesearch.ap-southeast-1.aliyuncs.com/";
 
 const server = http.createServer((req, res) => {
+  req.setTimeout(0);
   if (req.method === 'POST') {
         var form = new formidable.IncomingForm();
     	form.parse(req, function (err, fields, files) {
