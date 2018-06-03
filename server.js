@@ -10,26 +10,15 @@ var aliUri = "http://imagesearch.ap-southeast-1.aliyuncs.com/";
 
 const server = http.createServer((req, res) => {
   req.setTimeout(0);
-  if (req.method === 'POST') {
-        var form = new formidable.IncomingForm();
-    	form.parse(req, function (err, fields, files) {
-    		searchImage(files.photo, res);
-    	});
-    } 
-    else {
-        res.end(`
-            <!doctype html>
-            <html>
-            <body>
-                <form action="fileupload" method="post" enctype="multipart/form-data">
-                    <input type="file" name="photo" /><br />
-                    <button>Search</button>
-                </form>
-            </body>
-            </html>
-        `);
-    }
-
+  var url = require('url') ;
+  var queryObject = url.parse(req.url,true).query;
+  var imageId = queryObject.image;
+  if (imageId) {
+    return searchImage(res, imageId);
+  }
+  else {    
+    res.end("No result.");
+  }
 });
 
 server.timeout = 40000;
@@ -39,7 +28,25 @@ server.listen(process.env.PORT || 3000, function() {
 });
 
 
-function searchImage(file, res) {
+function searchImage (res, imageId) {
+  /*ohzDISz7GWPqSiOonArnWmbeXV5NWvgDVteCVSeTSM*/
+  var path = "http://amblique22-alliance-prtnr-hk01-dw.demandware.net/on/demandware.static/-/Sites-apparel-catalog/default/dw23ff9d7c/images/ali/" + imageId;
+  
+  http.get(path, function(response) {
+    var buffers = [];
+    response.on('data', function(buffer) {
+      buffers.push(buffer);
+    });
+
+    response.on('end', function() {
+      var buffer = Buffer.concat(buffers);
+      var fileContent = buffer.toString("base64");
+      callAlibabaSearchImage(fileContent, res);     
+    });
+  });
+}
+
+function callAlibabaSearchImage(fileContent, res) {
 
 	var Client = require("@alicloud/imagesearch-2018-01-20");
 	var client = new Client({
@@ -49,16 +56,18 @@ function searchImage(file, res) {
   		apiVersion: "2018-01-20"
 	});
 
-	var fs = require('fs');
-	var fileContent = fs.readFileSync(file.path).toString("base64");
 	var requestBody = buildRequestBody(fileContent);
 	client.searchItem({
   		instanceName: "demo",
 	}, requestBody, {}, {timeout:60000}).then(function (value) {
   		var html = parseResult(value);
+      res.header('Access-Control-Allow-Origin', 'example.com');
+      res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+      res.header('Access-Control-Allow-Headers', 'Content-Type');
   		res.end(html);
 	}).catch(function (err) {
   		console.log("Error Message: ", err);
+      res.end(err);
 	});
 
 }
@@ -72,7 +81,7 @@ function parseResult(result) {
     return "<p>No image found.</p>";
   
   var auctions = result.Auctions.Auction;
-	html.push("<html><body><ul>");
+	html.push("<ul>");
 
 	for(var i = 0; i < auctions.length; i++) {
 		var auction = auctions[i];
@@ -81,7 +90,7 @@ function parseResult(result) {
 		html.push("</li>");
 	}
 	
-	html.push("</ul></body></html>");
+	html.push("</ul>");
 	return html.join("");
 }
 
