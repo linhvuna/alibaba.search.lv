@@ -17,7 +17,7 @@ const server = http.createServer((req, res) => {
     return searchImage(res, imageId);
   }
   else {    
-    res.end("No image found...");
+    res.end("No result.");
   }
 });
 
