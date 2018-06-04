@@ -17,7 +17,7 @@ const server = http.createServer((req, res) => {
     return searchImage(res, imageId);
   }
   else {    
-    res.end("No result.");
+    res.end("No image found.");
   }
 });
 
@@ -59,7 +59,7 @@ function callAlibabaSearchImage(fileContent, res) {
 	var requestBody = buildRequestBody(fileContent);
 	client.searchItem({
   		instanceName: "demo",
-	}, requestBody, {}, {timeout:60000}).then(function (value) {
+	}, requestBody, {}, {timeout:600000}).then(function (value) {
   		var html = parseResult(value);
       res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
