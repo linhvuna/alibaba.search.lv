@@ -9,7 +9,7 @@ var secretKey = "F9Uddh0NNtbukhS6bPn7VnvXanbUAD";
 var aliUri = "http://imagesearch.ap-southeast-1.aliyuncs.com/";
 
 const server = http.createServer((req, res) => {
-  req.setTimeout(0);
+  req.setTimeout(600000);
   var url = require('url') ;
   var queryObject = url.parse(req.url,true).query;
   var imageId = queryObject.image;
@@ -17,11 +17,11 @@ const server = http.createServer((req, res) => {
     return searchImage(res, imageId);
   }
   else {    
-    res.end("No image found.");
+    res.end("No image found...");
   }
 });
 
-server.timeout = 40000;
+server.timeout = 600000;
 
 server.listen(process.env.PORT || 3000, function() {
   console.log('Listening on http://localhost:' + (process.env.PORT || 3000));
@@ -32,7 +32,7 @@ function searchImage (res, imageId) {
   /*ohzDISz7GWPqSiOonArnWmbeXV5NWvgDVteCVSeTSM*/
   var path = "http://amblique22-alliance-prtnr-hk01-dw.demandware.net/on/demandware.static/-/Sites-apparel-catalog/default/dw23ff9d7c/images/ali/" + imageId;
   
-  http.get(path, function(response) {
+  var request = http.get(path, function(response) {
     var buffers = [];
     response.on('data', function(buffer) {
       buffers.push(buffer);
@@ -44,6 +44,7 @@ function searchImage (res, imageId) {
       callAlibabaSearchImage(fileContent, res);     
     });
   });
+  request.setTimeout(600000);
 }
 
 function callAlibabaSearchImage(fileContent, res) {
