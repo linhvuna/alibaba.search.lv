@@ -13,8 +13,12 @@ const server = http.createServer((req, res) => {
   var url = require('url') ;
   var queryObject = url.parse(req.url,true).query;
   var imageId = queryObject.image;
+  var imageId2 = queryObject.img;
   if (imageId) {
     return searchImage(res, imageId);
+  }
+  if(imageId2) {
+    return searchImage2(res, imageId2);
   }
   else {    
     res.end("No image found...");
@@ -27,10 +31,28 @@ server.listen(process.env.PORT || 3000, function() {
   console.log('Listening on http://localhost:' + (process.env.PORT || 3000));
 });
 
+function searchImage2 (res, imageId) {
+  /*ohzDISz7GWPqSiOonArnWmbeXV5NWvgDVteCVSeTSM*/
+  var path = "http://amblique10-alliance-prtnr-hk02-dw.demandware.net/on/demandware.static/-/Sites-apparel-catalog/default/dw23ff9d7c/images/ali/" + imageId;
+  
+  var request = http.get(path, function(response) {
+    var buffers = [];
+    response.on('data', function(buffer) {
+      buffers.push(buffer);
+    });
+
+    response.on('end', function() {
+      var buffer = Buffer.concat(buffers);
+      var fileContent = buffer.toString("base64");
+      callAlibabaSearchImage2(fileContent, res);     
+    });
+  });
+  request.setTimeout(600000);
+}
 
 function searchImage (res, imageId) {
   /*ohzDISz7GWPqSiOonArnWmbeXV5NWvgDVteCVSeTSM*/
-  var path = "http://amblique22-alliance-prtnr-hk01-dw.demandware.net/on/demandware.static/-/Sites-apparel-catalog/default/dw23ff9d7c/images/ali/" + imageId;
+  var path = "http://amblique10-alliance-prtnr-hk02-dw.demandware.net/on/demandware.static/-/Sites-apparel-catalog/default/dw23ff9d7c/images/ali/" + imageId;
   
   var request = http.get(path, function(response) {
     var buffers = [];
@@ -73,11 +95,59 @@ function callAlibabaSearchImage(fileContent, res) {
 
 }
 
+function callAlibabaSearchImage2(fileContent, res) {
+
+	var Client = require("@alicloud/imagesearch-2018-01-20");
+	var client = new Client({
+  		accessKeyId: "LTAIuYFM3COHyshm",
+  		accessKeySecret: "F9Uddh0NNtbukhS6bPn7VnvXanbUAD",
+  		endpoint: "http://imagesearch.ap-southeast-1.aliyuncs.com/",
+  		apiVersion: "2018-01-20"
+	});
+
+	var requestBody = buildRequestBody(fileContent);
+	client.searchItem({
+  		instanceName: "demo",
+	}, requestBody, {}, {timeout:600000}).then(function (value) {
+  		var html = parseResult2(value);
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  		res.end(html);
+	}).catch(function (err) {
+  		console.log("Error Message: ", err);
+      res.end(err);
+	});
+
+}
+
+function parseResult2(result) {
+	var util = require( "util" );
+	
+  var html = [];
+  
+  if (!result.Auctions || !result.Auctions.Auction)
+    return JSON.stringify(html);
+  
+  var auctions = result.Auctions.Auction;
+	
+
+	for(var i = 0; i < auctions.length; i++) {
+		var auction = auctions[i];
+		
+		html.push(auction.PicName.replace('.jpg', ''));
+	
+	}
+	
+  return JSON.stringify(html);
+}
+
 function parseResult(result) {
 	var util = require( "util" );
 	var src = "<img src='http://sits-pod43.demandware.net/dw/image/v2/AANC_STG/on/demandware.static/-/Sites-MHJ_Master/default/dw06e2ea14/hi-res/%s?sw=224&sh=224&sm=fit' />";
 	
-	var html = [];
+  var html = [];
+  html.push("<html>");
   if (!result.Auctions || !result.Auctions.Auction)
     return "<p>No image found.</p>";
   
@@ -91,7 +161,8 @@ function parseResult(result) {
 		html.push("</li>");
 	}
 	
-	html.push("</ul>");
+  html.push("</ul>");
+  html.push("</html>");
 	return html.join("");
 }
 
